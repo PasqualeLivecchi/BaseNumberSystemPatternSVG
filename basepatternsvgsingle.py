@@ -229,5 +229,5 @@ if __name__ == '__main__':
     h = svghtml()
     print(f"svghtml:{time.time()-t0}")
     # print(h)
-    with open("svgatomicmodel.html",'w') as wr:
+    with open("svgmodel.html",'w') as wr:
         wr.write(h)
