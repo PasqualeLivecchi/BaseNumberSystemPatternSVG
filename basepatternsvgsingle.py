@@ -11,7 +11,7 @@ from functools import lru_cache
 # BASE_NUMBER_SYSTEM number works best when using numbers that range from a min number of 2 to max number of around 60. 
 # Much higher numbers can be used but over 60 then the numbers surrounding the graphic become unreadable,
 # over 1000 and the script will take up to 4 seconds to finish and the graphics will put heavy load on your computers graphics card.
-BASE_NUMBER_SYSTEM = 7
+BASE_NUMBER_SYSTEM = 10
 # OPERATION is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/',
 # addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', 
 # some do not work and will give errors, its best to stick to multiplication '*'.
@@ -22,22 +22,8 @@ COEFFICIENT = 2
 
 
 # USERS DON"T NEED TO CHANGE ANYTHING PAST THIS POINT
-instructions = """Could Be Useful When Designing For Eddy Currents, Magnet Motors, Electric 'Generators', Perpetual Motion Machines, etc...\n
-This spawned after I first watched Marko Rodin's Vortex Mathematics. Rodin discovered the patterns within the base 10 number system. \n
-After I watched many videos by Rodin, I wondered if patterns could be found in other base numebr systems.\n
-Turns out every base number system has patterns within.\n
-Examples of base number systems are decimal which is base 10, binary which is base 2, hexadecimal which is base 16, octal which is base 8 etc. \n
-The numbers on the graphic represent the symbols within the base number system and they are evenly separated around a circle.\n
-Each color represents a different repeating pattern. See https://youtu.be/kVD-6LG0-h0 for a more detailed explanation on how \n
-the patterns are determined. 
-\n
-Operation is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/', \n
-addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', \n
-some do not work and will give errors, its best to stick to multiplication '*'. \n
-\n
-Coefficient is what number is being continously multiplied, it can be any number from 1-9
-"""
-extra_info = f"Number Of Magnets Used On Motor: {BASE_NUMBER_SYSTEM-1}. Orient The Magnet's Poles With The Differently Colored Patterns To Reduce Eddy Currents)"
+instructions = """Could Be Useful When Designing For Eddy Currents, Magnet Motors, Electric 'Generators', Perpetual Motion Machines, etc... This spawned after I first watched Marko Rodin's Vortex Mathematics. Rodin discovered the patterns within the base 10 number system. After I watched many videos by Rodin, I wondered if patterns could be found in other base numebr systems. Turns out every base number system has patterns within. Examples of base number systems are decimal which is base 10, binary which is base 2, hexadecimal which is base 16, octal which is base 8 etc. The numbers on the graphic represent the symbols within the base number system and they are evenly separated around a circle. Each color represents a different repeating pattern. See https://youtu.be/kVD-6LG0-h0 for a more detailed explanation on how the patterns are determined. Operation is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/', addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', some do not work and will give errors, its best to stick to multiplication '*'.Coefficient is what number is being continously multiplied, it can be any number from 1-9"""
+extra_info = f"Number Of Magnets Used On Motor: {BASE_NUMBER_SYSTEM-1}. Orient The Magnet's Poles With The Differently Colored Patterns To Reduce Eddy Currents"
 basepatterninfo = namedtuple('bpi',['base','operation','coefficient','width','height','rotation','increment'])
 htmllst = []
 
