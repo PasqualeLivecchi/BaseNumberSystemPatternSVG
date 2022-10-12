@@ -1,8 +1,9 @@
 from flask import Markup
-import numpy, time, concurrent.futures, os, sys, traceback
 from itertools import chain
 from collections import OrderedDict,namedtuple
 from functools import lru_cache
+from browser import document, svg
+import numpy, time, concurrent.futures, os, sys, traceback
 
 
 # Script that creates a html file that can be opened in a browser to show an svg image containing all patterns in the 
@@ -11,7 +12,7 @@ from functools import lru_cache
 # BASE_NUMBER_SYSTEM number works best when using numbers that range from a min number of 2 to max number of around 60. 
 # Much higher numbers can be used but over 60 then the numbers surrounding the graphic become unreadable,
 # over 1000 and the script will take up to 4 seconds to finish and the graphics will put heavy load on your computers graphics card.
-BASE_NUMBER_SYSTEM = 66
+BASE_NUMBER_SYSTEM = 20
 # OPERATION is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/',
 # addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', 
 # some do not work and will give errors, its best to stick to multiplication '*'.
@@ -22,8 +23,8 @@ COEFFICIENT = 2
 
 
 # USERS DON"T NEED TO CHANGE ANYTHING PAST THIS POINT
-# instructions = """Could Be Useful When Designing For Eddy Currents, Magnet Motors, Electric 'Generators', Perpetual Motion Machines, etc... This spawned after I first watched Marko Rodin's Vortex Mathematics. Rodin discovered the patterns within the base 10 number system. After I watched many videos by Rodin, I wondered if patterns could be found in other base numebr systems. Turns out every base number system has patterns within. Examples of base number systems are decimal which is base 10, binary which is base 2, hexadecimal which is base 16, octal which is base 8 etc. The numbers on the graphic represent the symbols within the base number system and they are evenly separated around a circle. Each color represents a different repeating pattern. See https://youtu.be/kVD-6LG0-h0 for a more detailed explanation on how the patterns are determined. Operation is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/', addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', some do not work and will give errors, its best to stick to multiplication '*'.Coefficient is what number is being continously multiplied, it can be any number from 1-9"""
-# extra_info = f"Number Of Magnets Used On Motor: {BASE_NUMBER_SYSTEM-1}. Orient The Magnet's Poles With The Differently Colored Patterns To Reduce Eddy Currents"
+instructions = """Could Be Useful When Designing For Eddy Currents, Magnet Motors, Electric 'Generators', Perpetual Motion Machines, etc... This spawned after I first watched Marko Rodin's Vortex Mathematics. Rodin discovered the patterns within the base 10 number system. After I watched many videos by Rodin, I wondered if patterns could be found in other base numebr systems. Turns out every base number system has patterns within. Examples of base number systems are decimal which is base 10, binary which is base 2, hexadecimal which is base 16, octal which is base 8 etc. The numbers on the graphic represent the symbols within the base number system and they are evenly separated around a circle. Each color represents a different repeating pattern. See https://youtu.be/kVD-6LG0-h0 for a more detailed explanation on how the patterns are determined. Operation is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/', addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', some do not work and will give errors, its best to stick to multiplication '*'.Coefficient is what number is being continously multiplied, it can be any number from 1-9"""
+extra_info = f"Number Of Magnets Used On Motor: {BASE_NUMBER_SYSTEM-1}. Orient The Magnet's Poles With The Differently Colored Patterns To Reduce Eddy Currents"
 basepatterninfo = namedtuple('bpi',['base','operation','coefficient','width','height','rotation','increment'])
 htmllst = []
 
@@ -57,6 +58,7 @@ def create_svg_html(*bpi):
     base,operation,coefficient,width,height,hasspiral,increment = bpi
     abp = all_base_patterns(*bpi)
     ptlocations = point_locations(*bpi)
+    print(f"create_svg_html point_location cache:{point_locations.cache_info()}")
     pps = pattern_paths(abp,ptlocations)
     htmlsvglst,i,colormkuplst = [],1,[]
     while len(pps) > 0:
@@ -75,17 +77,13 @@ def create_svg_html(*bpi):
             else:
                 svgpts.append(f"{pt[0]},{pt[1]}")
         color = str(hex(time.time_ns()*i))[-6:]
-        mkupstr = f"<polygon class='polygon-patterns' points='{' '.join(svgpts)}' fill='none' stroke='#{color}' stroke-width='2'></polygon>"
+        mkupstr = svg.polygon(Class='polygon-patterns', points= ''.join(svgpts), fill='none', stroke=f"#{color}", stroke_width='2')
         i += 1
         colormkuplst.append(Markup(f"{mkupstr}"))
     ptl = [f"{pt[0]},{pt[1]}" for pt in ptlocations.values()]
-    ratioview2text = max(width,height)//66
-    svgtextlst = []
-    # svgtextlst displays the number in its appropriate position around the circle. Used for more scientific purposes, not suitable for art.
-    # svgtextlst = [f"<text fill='#ae76e4' font-size='{ratioview2text}' x='{xypos[0]}' y='{xypos[1]}' transform='rotate(90 {xypos[0]},{xypos[1]})'>{numkey}</text>" for numkey, xypos in ptlocations.items()]
-    # equationtxt displays the base, operation, and coefficient being used to get the patterns. Used for more scientific purposes and debugging. Placed before the following svg.
-    # equationtxt = Markup(f"<div class='patterndiv'><div id='equationlabel{base}{operation}{coefficient}' class='equationlabel'>Base Number System: {base} Operation: {operation} Coefficient: {coefficient} Equation: {base} {operation} {coefficient}</div>")
-    htmlsvglst = [Markup(f"<svg class='svg-content' width='{width}' height='{height}' viewBox='-{ratioview2text},-{ratioview2text},{width+ratioview2text*2},{height+ratioview2text*2}'>{''.join(svgtextlst)}<polygon points='{' '.join(ptl)}' fill='none' stroke='black' stroke-width='2'></polygon>")]
+    ratioview2text = max(width,height)//15
+    svgtext = [svg.text(numkey, fill='#ae76e4', font_size=ratioview2text, x=xypos[0], y=xypos[1], transform=f"rotate(90 {xypos[0]},{xypos[1]})") for numkey, xypos in ptlocations.items()]
+    htmlsvglst = [Markup(f"<div class='patterndiv'><div id='equationlabel{base}{operation}{coefficient}' class='equationlabel'>Base Number System: {base} Operation: {operation} Coefficient: {coefficient} Equation: {base} {operation} {coefficient}</div><div id='extrainfodiv'>{extra_info}</div><svg class='svg-content' width='{width}' height='{height}' viewBox='-{ratioview2text},-{ratioview2text},{width+ratioview2text*2},{height+ratioview2text*2}'>{''.join(svgtext)}<polygon points='{' '.join(ptl)}' fill='none' stroke='black' stroke-width='2'></polygon>")]
     htmlsvglst.extend(colormkuplst)
     htmlsvglst.append(Markup("</svg></div>"))
     return htmlsvglst
@@ -110,6 +108,7 @@ def pattern_paths(abp,ptlocations):
 
 @lru_cache(maxsize=10000)
 def point_locations(*bpi):
+    print(point_locations.cache_info())
     base,operation,coefficient,w,h,hasspiral,increment = bpi
     ptdict = {}
     angle = 360/(base-1)
@@ -206,12 +205,15 @@ def all_base_patterns(*bpi):
 
 # left: 21rem; top: 6rem; 
 def svghtml():
-    htmllst = create_svg_html(*basepatterninfo(BASE_NUMBER_SYSTEM,OPERATION,COEFFICIENT,963,963,False,False))
-    html = "<!doctype html><html lang='en'>"
-    html += f"""<head>
+    htmllst = create_svg_html(*basepatterninfo(BASE_NUMBER_SYSTEM,OPERATION,COEFFICIENT,666,666,False,False))
+    html = """<!doctype html><html lang='en'>
+    <head>
     <style>
         .patterndiv {{position: relative;}}
-        .svg-content {{position: fixed; left:24%; transform: rotate(-90deg); }}
+        .equationlabel {{top:40px; text-align: center;}}
+        #extrainfodiv {{right:80%; text-align: center;}}
+        #instructiondiv {{left:20%; right:20%; text-align: center;}}
+        .svg-content {{position: relative; left:30%; top:10px; transform: rotate(-90deg); }}
         .polygon-patterns {{stroke-dasharray: 200; stroke-width: 6; animation: draw 12s linear reverse infinite;}}
         @keyframes draw {{from {{stroke-dashoffset: 0;}} to {{stroke-dashoffset: 5000;}}}}
         @keyframes spin {{from {{transform: rotate(0deg);}} to {{transform: rotate(360deg);}}}}
@@ -219,6 +221,8 @@ def svghtml():
     </head>
     <body>"""
     html += "".join(htmllst)
+    html += f"<div id='instructiondiv'>{instructions}</div></body></html>"
+    document <= html
     return html
 
 if __name__ == '__main__':
