@@ -1,3 +1,6 @@
+# Script that creates a html file that can be opened in a browser to show an svg image containing all patterns in the 
+# base number system, operation, and coefficient equation. See for an explanation of how the patterns are found:
+# https://youtu.be/kVD-6LG0-h0
 from flask import Markup
 import numpy, time, concurrent.futures, os, sys, traceback
 from itertools import chain
@@ -5,13 +8,11 @@ from collections import OrderedDict,namedtuple
 from functools import lru_cache
 
 
-# Script that creates a html file that can be opened in a browser to show an svg image containing all patterns in the 
-# base number system, operation, and coefficient equation. See for an explanation of how the patterns are found:
-# https://youtu.be/kVD-6LG0-h0
-# BASE_NUMBER_SYSTEM number works best when using numbers that range from a min number of 2 to max number of around 60. 
-# Much higher numbers can be used but over 60 then the numbers surrounding the graphic become unreadable,
-# over 1000 and the script will take up to 4 seconds to finish and the graphics will put heavy load on your computers graphics card.
-BASE_NUMBER_SYSTEM = 911
+
+# BASE_NUMBER_SYSTEM number works best when using numbers that range from a min number of 2 to max number of around 600. 
+# Much higher numbers can be used but over 100 or so then the numbers surrounding the graphic become unreadable,
+# over 1000 and the script will take up to 3 seconds to finish. Higher than 2000 and it will take 20-30 seconds for the script to finish.
+BASE_NUMBER_SYSTEM = 66
 # OPERATION is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/',
 # addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', 
 # some do not work and will give errors, its best to stick to multiplication '*'.
