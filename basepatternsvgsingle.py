@@ -11,14 +11,14 @@ from functools import lru_cache
 # BASE_NUMBER_SYSTEM number works best when using numbers that range from a min number of 2 to max number of around 60. 
 # Much higher numbers can be used but over 60 then the numbers surrounding the graphic become unreadable,
 # over 1000 and the script will take up to 4 seconds to finish and the graphics will put heavy load on your computers graphics card.
-BASE_NUMBER_SYSTEM = 55
+BASE_NUMBER_SYSTEM = 911
 # OPERATION is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/',
 # addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', 
 # some do not work and will give errors, its best to stick to multiplication '*'.
 OPERATION = '*'
 # COEFFICIENT is what number is being continously multiplied, 
 # it can be any number from 1-9
-COEFFICIENT = 7 
+COEFFICIENT = 3 
 
 
 # USERS DON"T NEED TO CHANGE ANYTHING PAST THIS POINT
@@ -81,7 +81,7 @@ def create_svg_html(*bpi):
     svgtextlst = []
     # svgtextlst displays the number in its appropriate position around the circle.
     svgtextlst = [f"<text fill='#ae76e4' font-size='{ratioview2text}' x='{xypos[0]}' y='{xypos[1]}' transform='rotate(90 {xypos[0]},{xypos[1]})'>{numkey}</text>" for numkey, xypos in ptlocations.items()]
-    htmlsvglst = [Markup(f"<div class='patterndiv'><div id='equationlabel{base}{operation}{coefficient}' class='equationlabel'>Base Number System: {base} Operation: {operation} Coefficient: {coefficient} Equation: {base} {operation} {coefficient} Each color is a repeating pattern that occurs when the equation {base} {operation} {coefficient} is repeated and then the result is reduced by addition into their single digit (number less than the base number).</div><svg class='svg-content' width='{width}' height='{height}' viewBox='-{ratioview2text},-{ratioview2text},{width+ratioview2text*2},{height+ratioview2text*2}'>{''.join(svgtextlst)}<polygon points='{' '.join(ptl)}' fill='none' stroke='black' stroke-width='2'></polygon>")]
+    htmlsvglst = [Markup(f"<div class='patterndiv'><div id='equationlabel{base}{operation}{coefficient}' class='equationlabel'>Base Number System: {base} Operation: {operation} Coefficient: {coefficient} Equation: {base} {operation} {coefficient} Each color is a repeating pattern that occurs when the operation {operation} {coefficient} is repeated and then the result is reduced by addition into a single digit (number less than the base number).</div><svg class='svg-content' width='{width}' height='{height}' viewBox='-{ratioview2text},-{ratioview2text},{width+ratioview2text*2},{height+ratioview2text*2}'>{''.join(svgtextlst)}<polygon points='{' '.join(ptl)}' fill='none' stroke='black' stroke-width='2'></polygon>")]
     htmlsvglst.extend(colormkuplst)
     htmlsvglst.append(Markup("</svg></div>"))
     return htmlsvglst
