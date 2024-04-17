@@ -12,14 +12,14 @@ from functools import lru_cache
 # BASE_NUMBER_SYSTEM number works best when using numbers that range from a min number of 2 to max number of around 600. 
 # Much higher numbers can be used but over 100 or so then the numbers surrounding the graphic become unreadable,
 # over 1000 and the script will take up to 3 seconds to finish. Higher than 2000 and it will take 20-30 seconds for the script to finish.
-BASE_NUMBER_SYSTEM = 66
+BASE_NUMBER_SYSTEM = 11
 # OPERATION is the type of mathematic operation to find patterns for possible values are multiplication '*', division '/',
 # addition '+', subtraction '-', AND '&', OR '|', XOR '^', fourier 'f', bitshift left '<<', bitshift right '>>', 
 # some do not work and will give errors, its best to stick to multiplication '*'.
 OPERATION = '*'
 # COEFFICIENT is what number is being continously multiplied, 
 # it can be any number from 1-9
-COEFFICIENT = 3 
+COEFFICIENT = 2 
 
 
 # USERS DON"T NEED TO CHANGE ANYTHING PAST THIS POINT
@@ -55,10 +55,20 @@ class IndexedSet:
 def create_svg_html(*bpi):
     base,operation,coefficient,width,height,hasspiral,increment = bpi
     abp = all_base_patterns(*bpi)
-    ptlocations = point_locations(*bpi)
-    pps = pattern_paths(abp,ptlocations)
+    abp_points_text_list = []
+    isuffixes = ['st', 'nd', 'rd', 'th']
     htmlsvglst,i,colormkuplst = [],1,[]
+    for j,pat in enumerate(abp): 
+        abp_points_text_list.append(f"<div id=colortextpts{j}>{j+1}{isuffixes[min(j,3)]} repeating pattern:{pat}")
+    ptlocations = point_locations(*bpi)
+    print(len(abp_points_text_list))
+    pps = pattern_paths(abp,ptlocations)
+    
+    print(len(pps))
     while len(pps) > 0:
+        color = str(hex(time.time_ns()*i))[-6:]
+        colorindex = i-1
+        abp_points_text_list[colorindex] += f" hexcolor={color}<style>#colortextpts{colorindex} {{color:#{color}}}</style></div>"
         od = pps.pop()
         svgpts = []
         odv = od.values()
@@ -73,16 +83,15 @@ def create_svg_html(*bpi):
                 svgpts.append(f"{pt[0]-percent2w},{pt[1]-percent2h}")
             else:
                 svgpts.append(f"{pt[0]},{pt[1]}")
-        color = str(hex(time.time_ns()*i))[-6:]
-        mkupstr = f"<polygon class='polygon-patterns' points='{' '.join(svgpts)}' fill='none' stroke='#{color}' stroke-width='2'></polygon>"
+        mkupstr = f"<polygon id='polygon-id{i}' class='polygon-patterns' points='{' '.join(svgpts)}' fill='none' stroke='#{color}' stroke-width='2'></polygon>"
         i += 1
         colormkuplst.append(Markup(f"{mkupstr}"))
     ptl = [f"{pt[0]},{pt[1]}" for pt in ptlocations.values()]
-    ratioview2text = max(width,height)//35
+    ratioview2text = max(width,height)//20
     svgtextlst = []
     # svgtextlst displays the number in its appropriate position around the circle.
     svgtextlst = [f"<text fill='#ae76e4' font-size='{ratioview2text}' x='{xypos[0]}' y='{xypos[1]}' transform='rotate(90 {xypos[0]},{xypos[1]})'>{numkey}</text>" for numkey, xypos in ptlocations.items()]
-    htmlsvglst = [Markup(f"<div class='patterndiv'><div id='equationlabel{base}{operation}{coefficient}' class='equationlabel'>Base Number System: {base} Operation: {operation} Coefficient: {coefficient} Equation: {base} {operation} {coefficient} Each color is a repeating pattern that occurs when the operation {operation} {coefficient} is repeated and then the result is reduced by addition into a single digit (number less than the base number).</div><svg class='svg-content' width='{width}' height='{height}' viewBox='-{ratioview2text},-{ratioview2text},{width+ratioview2text*2},{height+ratioview2text*2}'>{''.join(svgtextlst)}<polygon points='{' '.join(ptl)}' fill='none' stroke='black' stroke-width='2'></polygon>")]
+    htmlsvglst = [Markup(f"<div class='patterndiv'><div id='equationlabel{base}{operation}{coefficient}' class='equationlabel'>Base Number System: {base}, Operation: {operation}, Coefficient: {coefficient}, Equation: {base} {operation} {coefficient} <p>Each color is a repeating pattern that occurs when the operation {operation} {coefficient} is repeated</p>{' '.join(abp_points_text_list)}<p>and then the result is reduced by addition into a single digit within the base number system.</p></div><svg class='svg-content' width='{width}' height='{height}' viewBox='-{ratioview2text},-{ratioview2text},{width+ratioview2text*2},{height+ratioview2text*2}'>{''.join(svgtextlst)}<polygon points='{' '.join(ptl)}' fill='none' stroke='black' stroke-width='2'></polygon>")]
     htmlsvglst.extend(colormkuplst)
     htmlsvglst.append(Markup("</svg></div>"))
     return htmlsvglst
@@ -95,12 +104,14 @@ def pattern_paths(abp,ptlocations):
         l = [int(num) for num in pstr.split(',')]
         d = OrderedDict.fromkeys(l)
         haszero = False
+        print(d)
         for k in d.keys():
             # haszero = k == 0
             # if haszero:
             #     print('haszero')
             #     break
             d[k] = dloc[k]
+        print(f"after:{d}")
         if not haszero:
             plst.append(d)
     return plst
@@ -203,7 +214,7 @@ def all_base_patterns(*bpi):
 
 # left: 21rem; top: 6rem; 
 def svghtml():
-    htmllst = create_svg_html(*basepatterninfo(BASE_NUMBER_SYSTEM,OPERATION,COEFFICIENT,888,888,False,False))
+    htmllst = create_svg_html(*basepatterninfo(BASE_NUMBER_SYSTEM,OPERATION,COEFFICIENT,555,555,False,False))
     html = "<!doctype html><html lang='en'>"
     html += f"""<head>
     <style>
@@ -211,7 +222,7 @@ def svghtml():
         .equationlabel {{top:40px; text-align: center;}}
         #extrainfodiv {{right:80%; text-align: center;}}
         #instructiondiv {{left:20%; right:20%; text-align: center;}}
-        .svg-content {{position: fixed; left:24%; transform: rotate(-90deg); }}
+        .svg-content {{position: sticky; left:30%; transform: rotate(-90deg);}}
         .polygon-patterns {{stroke-dasharray: 200; stroke-width: 6; animation: draw 12s linear reverse infinite;}}
         @keyframes draw {{from {{stroke-dashoffset: 0;}} to {{stroke-dashoffset: 5000;}}}}
         @keyframes spin {{from {{transform: rotate(0deg);}} to {{transform: rotate(360deg);}}}}

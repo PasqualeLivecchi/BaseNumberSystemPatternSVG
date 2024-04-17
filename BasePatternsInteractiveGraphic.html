@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang='en'>
+
+<head>
+    <style>
+        .patterndiv {
+            position: relative;
+        }
+
+        .equationlabel {
+            top: 40px;
+            text-align: center;
+        }
+
+        #extrainfodiv {
+            right: 80%;
+            text-align: center;
+        }
+
+        #instructiondiv {
+            left: 20%;
+            right: 20%;
+            text-align: center;
+        }
+
+        .svg-content {
+            position: sticky;
+            left: 30%;
+            transform: rotate(-90deg);
+        }
+
+        .polygon-patterns {
+            stroke-dasharray: 200;
+            stroke-width: 6;
+            animation: draw 12s linear reverse infinite;
+        }
+
+        @keyframes draw {
+            from {
+                stroke-dashoffset: 0;
+            }
+
+            to {
+                stroke-dashoffset: 5000;
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    <title>Base Patterns Interactive Graphic</title>
+</head>
+
+<body>
+    <h2>Base Patterns Interactive Graphic</h2>
+    <div id="userInputId">
+        <label for="basenumber">Base Number:</label>
+        <input id="baseId" type="text" id="basenumber" name="basenumber" value="10">
+        <label for="op">Choose Operation:</label>
+        <select id="opId" name="op">
+            <option value="*">*</option>
+            <option value="/">/</option>
+            <option value="+">+</option>
+            <option value="-">-</option>
+        </select>
+        <label for="coef">Choose Coefficient:</label>
+        <select id="coefId" name="coef">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+        </select>
+        <input id="submitButtonId" type="submit" value="submit">
+    </div>
+    <script>
+        let formData = document.getElementById("submitButtonId");
+        formData.onclick = updateSVG;
+        function updateSVG() {
+            // alert("Button Clicked");
+            var base = parseInt(document.getElementById("baseId").value);
+            var op = document.getElementById("opId").value;
+            var coef = parseInt(document.getElementById("coefId").value);
+            var graphicsSvgDoc = createSvgHtml(base, op, coef, 369, 369, false);
+            var patternDiv = document.getElementById("patterndiv");
+            if (patternDiv){
+                patternDiv.remove();
+            }
+            document.body.insertAdjacentHTML("afterend", graphicsSvgDoc);
+        }
+
+
+        function createSvgHtml(base, operation, coefficient, width, height, hasspiral) {
+            console.log("running createSvgHtml function");
+            const abpList = allBasePatterns(base, operation, coefficient);
+            const abpPointsTextList = [];
+            const iSuffixes = ['st', 'nd', 'rd', 'th'];
+            const htmlSvgList = [];
+            let i = 1;
+            const colorMkupList = [];
+
+            for (let j = 0; j < abpList.length; j++) {
+                abpPointsTextList.push(`<div id=colortextpts${j}>${j + 1}${iSuffixes[Math.min(j, 3)]} repeating pattern:${abpList[j]}`);
+            }
+
+            const ptLocations = pointLocations(base, operation, coefficient, width, height, hasspiral);
+            const pps = patternPaths(abpList, ptLocations);
+
+            while (pps.length > 0) {
+                //random color selected
+                const color = `#${(BigInt(Date.now()) * BigInt(i*i)).toString(16).slice(-6)}`;
+                const colorIndex = i - 1;
+                abpPointsTextList[colorIndex] += ` hexcolor=${color}<style>#colortextpts${colorIndex} {color:${color}</style></div>`;
+                const od = pps.pop();
+                console.log("od");
+                console.log(od);
+                const svgPts = [];
+                const odv = Object.values(od);
+                console.log("odv");
+                console.log(odv);
+
+                for (const pt of odv) {
+                    if (odv.length === 1) {
+                        const percent2w = Math.floor(width / 50);
+                        const percent2h = Math.floor(height / 50);
+                        svgPts.push(`${pt[0] - percent2w},${pt[1] - percent2h}`);
+                        svgPts.push(`${pt[0] + percent2w},${pt[1] - percent2h}`);
+                        svgPts.push(`${pt[0] + percent2w},${pt[1] + percent2h}`);
+                        svgPts.push(`${pt[0] - percent2w},${pt[1] + percent2h}`);
+                        svgPts.push(`${pt[0] - percent2w},${pt[1] - percent2h}`);
+                    } else {
+                        svgPts.push(`${pt[0]},${pt[1]}`);
+                    }
+                }
+
+                const mkupStr = `<polygon id='polygonId${i}' class='polygon-patterns' points='${svgPts.join(' ')}' fill='none' stroke='${color}' stroke-width='2'></polygon>`;
+                i += 1;
+                colorMkupList.push(mkupStr);
+            }
+
+            const ptl = Object.values(ptLocations).map(pt => `${pt[0]},${pt[1]}`);
+            const ratioView2Text = Math.max(width, height) / 20;
+            const svgTextList = [];
+
+            for (const [numKey, xyPos] of Object.entries(ptLocations)) {
+                svgTextList.push(`<text fill='#ae76e4' font-size='${ratioView2Text}' x='${xyPos[0]}' y='${xyPos[1]}' transform='rotate(90 ${xyPos[0]},${xyPos[1]})'>${numKey}</text>`);
+            }
+
+            htmlSvgList.push(`<div id="patterndiv" class='patterndiv'><div id='equationlabel${base}${operation}${coefficient}' class='equationlabel'>Base Number System: ${base}, Operation: ${operation}, Coefficient: ${coefficient}, Equation: ${base} ${operation} ${coefficient} <p>Each color is a repeating pattern that occurs when the operation ${operation} ${coefficient} is repeated</p>${abpPointsTextList.join('')}<p>and then the result is reduced by addition into a single digit within the base number system.</p></div><svg class='svg-content' width='${width}' height='${height}' viewBox='-${ratioView2Text*2},-${ratioView2Text*2},${width + ratioView2Text * 3},${height + ratioView2Text * 3}'>${svgTextList.join('')}<polygon points='${ptl.join(' ')}' fill='none' stroke='black' stroke-width='2'></polygon>${colorMkupList.join('')}</svg></div>`)
+
+            return htmlSvgList.join("");
+        }
+
+        function patternPaths(abpList, ptlocations) {
+            console.log("running patternPaths function");
+            var plst = [];
+            var dloc = ptlocations;
+            while (abpList.length > 0) {
+                var pstr = abpList.pop();
+                var l = pstr.split(',').map(function (num) {
+                    return parseInt(num);
+                });
+                console.log("l");
+                console.log(l);
+                var d = {};
+                //this is VOODOO done because javascript and web don't allow for ordered dictionaries
+                //so the best way to deal with that is to make the key the value. Its voodoo, idk why
+                //it works haha!
+                l.forEach(function (num) {
+                    d[dloc[num]] = dloc[num];
+                });
+                plst.push(d);
+            }
+            return plst;
+        }
+
+        function pointLocations(base, operation, coefficient, width, height, hasspiral) {
+            console.log("running pointLocations function");
+            var ptdict = {};
+            var angle = 360 / (base - 1);
+            var hw = Math.floor(width / 2);
+            var hh = Math.floor(height / 2);
+            var dist = Math.floor((width + height) / 4);
+            var spiral = Math.max(Math.floor(dist / (base - 1)), 1);
+            for (var i = 1; i < base; i++) {
+                var ang = angle * i;
+                ptdict[i] = [dist * Math.cos(ang * Math.PI / 180) + hw, dist * Math.sin(ang * Math.PI / 180) + hh];
+                dist = hasspiral ? dist - spiral : dist;
+            }
+            return ptdict;
+        }
+
+        function d2b(d, base) {
+            var quot = Math.floor(d / base);
+            var rem = d % base;
+            var d2bstr = '?' + rem;
+            while (quot > 0) {
+                rem = quot % base;
+                quot = Math.floor(quot / base);
+                d2bstr = '?' + rem + d2bstr;
+            }
+            return base + ':' + d2bstr;
+        }
+
+        function digitalroot(bdstr) {
+            let i = 0;
+            let b = 0;
+            let dstr = "";
+            let dstrmax = 0;
+            let bdsplit = [];
+            let dsum = 0;
+            bdsplit = bdstr.split(":");
+            b = parseInt(bdsplit[0]);
+            dstr = bdsplit[1];
+            dstrmax = dstr.split("?").length - 1;
+            while (i <= dstrmax) {
+                dsum = dstr.split("?").slice(1).reduce((acc, d) => acc + parseInt(d), 0);
+                i += 1;
+            }
+            while (dsum >= b) {
+                dsum = digitalroot(d2b(dsum, b));
+            }
+            return dsum;
+        }
+
+        function operationswitch(digroot, op, coef) {
+            switch (op) {
+                case 'mult':
+                case 'multiply':
+                case '*':
+                    return digroot * coef;
+                case 'div':
+                case 'divide':
+                case '/':
+                    return Math.floor(digroot / coef);
+                case 'add':
+                case 'plus':
+                case '+':
+                    return digroot + coef;
+                case 'sub':
+                case 'minus':
+                case '-':
+                    return digroot - coef;
+                case 'and':
+                case '&':
+                    return digroot & coef;
+                case 'xor':
+                case '^':
+                    return digroot ^ coef;
+                case 'or':
+                case '|':
+                    return digroot | coef;
+                case 'fourier':
+                case 'f':
+                    return parseInt(digroot * Math.pow(2, coef * 4));
+                case 'bitshiftright':
+                case '>>':
+                    return digroot >> coef;
+                case 'bitshiftleft':
+                case '<<':
+                    return digroot << coef;
+            }
+        }
+
+        function singleOperationBasePatterns(start, base, operation, coefficient) {
+            console.log("running singleOperationBasePatterns function");
+            // const [base, op, coef, w, h, hasspiral, increment] = bpi;
+            let single_op = "";
+            let i = 1;
+            let _next = start;
+            while (i < base) {
+                const _single = digitalroot(d2b(_next, base));
+                single_op += `,${_single}`;
+                _next = operationswitch(_single, operation, coefficient);
+                i += 1;
+            }
+            return single_op;
+        }
+
+        function allBasePatterns(base, operation, coefficient) {
+            console.log("running allBasePatterns function");
+            let i = 1;
+            let k = 0;
+            let abpstr = "";
+            let dupels = [];
+            while (i < base) {
+                abpstr = `${abpstr}\?${singleOperationBasePatterns(i, base, operation, coefficient)}`;
+                i += 1;
+            }
+            let abpList = abpstr.split("?").slice(1);
+            let abpis = abpList.map(bp => new Set(bp.split(",").slice(1)));
+            let allbasepats = [];
+            for (let bi = 1; bi < base; bi++) {
+                for (let ab of abpis) {
+                    let abps = Array.from(ab).join(",");
+                    if (ab.has(String(bi))) {
+                        if (!allbasepats.includes(abps)) {
+                            allbasepats.push(abps);
+                        }
+                        break;
+                    }
+                }
+            }
+            if (base % 2 === 1 && operation === "*" && coefficient === 2) {
+                allbasepats.push(String(base - 1));
+            }
+            return allbasepats;
+        }
+
+
+
+
+
+    </script>
+</body>
+
+</html>
