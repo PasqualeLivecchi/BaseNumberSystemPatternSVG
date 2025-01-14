@@ -62,25 +62,19 @@
     <h2>Base Patterns Interactive Graphic</h2>
     <div id="userInputId">
         <label for="basenumber">Base Number:</label>
-        <input id="baseId" type="text" id="basenumber" name="basenumber" value="10">
+        <input id="baseId" type="text" name="basenumber" value="10">
         <label for="op">Choose Operation:</label>
         <select id="opId" name="op">
             <option value="*">*</option>
             <option value="/">/</option>
             <option value="+">+</option>
-            <option value="-">-</option>
+            <option value="-">absolute values -</option>
+            <option value="&">bitwise AND &</option>
+            <option value="|">bitwise OR |</option>
+            <option value="^">bitwise XOR ^</option>
         </select>
-        <label for="coef">Choose Coefficient:</label>
-        <select id="coefId" name="coef">
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-        </select>
+        <label for="coef">Coefficient:</label>
+        <input id="coefId" type="text" name="coef" value="2">
         <input id="submitButtonId" type="submit" value="submit">
     </div>
     <script>
@@ -91,6 +85,10 @@
             var base = parseInt(document.getElementById("baseId").value);
             var op = document.getElementById("opId").value;
             var coef = parseInt(document.getElementById("coefId").value);
+            if (coef >= base || coef < 1){
+                alert("Coefficient must be less than Base Number and greater than 0!");
+                return;
+            } 
             var graphicsSvgDoc = createSvgHtml(base, op, coef, 369, 369, false);
             var patternDiv = document.getElementById("patterndiv");
             if (patternDiv){
@@ -122,14 +120,23 @@
                 const colorIndex = i - 1;
                 abpPointsTextList[colorIndex] += ` hexcolor=${color}<style>#colortextpts${colorIndex} {color:${color}</style></div>`;
                 const od = pps.pop();
-                console.log("od");
-                console.log(od);
+                // console.log("od " + od);
+                // console.log(od);
                 const svgPts = [];
                 const odv = Object.values(od);
-                console.log("odv");
-                console.log(odv);
+                // console.log("odv " + odv);
+                // console.log(odv);
 
                 for (const pt of odv) {
+                    // pt is undefined and converges to 0 when using the division (/), and (&), xor (^), and subtraction (-) operations
+                    // There is likely a better way to convey this in the graphic instead of just omitting it from the graphic
+
+                    // This check omits patterns that are only 2 numbers long and converge on 0. 
+                    // all the TypeErrors that occur when division (/), and (&), xor (^), and subtraction (-) are fixed wit this check
+                    if (pt === undefined){
+                        // console.log("if pattern converges to 0 and is not longer than 2 numbers it will not be rendered in the graphic")
+                        continue;
+                    }
                     if (odv.length === 1) {
                         const percent2w = Math.floor(width / 50);
                         const percent2h = Math.floor(height / 50);
@@ -170,8 +177,8 @@
                 var l = pstr.split(',').map(function (num) {
                     return parseInt(num);
                 });
-                console.log("l");
-                console.log(l);
+                // console.log("l");
+                // console.log(l);
                 var d = {};
                 //this is VOODOO done because javascript and web don't allow for ordered dictionaries
                 //so the best way to deal with that is to make the key the value. Its voodoo, idk why
@@ -250,15 +257,18 @@
                 case 'sub':
                 case 'minus':
                 case '-':
-                    return digroot - coef;
+                    return Math.abs(digroot - coef);
                 case 'and':
                 case '&':
+                    // console.log("digroot & coef " + (digroot & coef))
                     return digroot & coef;
                 case 'xor':
                 case '^':
+                    // console.log("digroot ^ coef " + (digroot ^ coef))
                     return digroot ^ coef;
                 case 'or':
                 case '|':
+                    // console.log("digroot | coef " + (digroot | coef))
                     return digroot | coef;
                 case 'fourier':
                 case 'f':
