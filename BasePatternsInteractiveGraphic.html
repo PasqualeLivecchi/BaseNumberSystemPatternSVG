@@ -3,8 +3,11 @@
 
 <head>
     <style>
-        .patterndiv {
-            position: relative;
+        .patterndiv { /* deals with alignment of text and svg graphic */
+            position: sticky;
+            left: 20%;
+            right: 20%;
+            text-align: center;
         }
 
         .equationlabel {
@@ -12,21 +15,14 @@
             text-align: center;
         }
 
-        #extrainfodiv {
-            right: 80%;
-            text-align: center;
-        }
-
-        #instructiondiv {
-            left: 20%;
-            right: 20%;
-            text-align: center;
-        }
-
         .svg-content {
-            position: sticky;
-            left: 30%;
             transform: rotate(-90deg);
+        }
+
+        .polygon-patterns {
+            stroke-dasharray: 200;
+            stroke-width: 6;
+            animation: draw 12s linear reverse infinite;
         }
 
         .polygon-patterns {
@@ -104,7 +100,6 @@
             const abpPointsTextList = [];
             const iSuffixes = ['st', 'nd', 'rd', 'th'];
             const htmlSvgList = [];
-            let i = 1;
             const colorMkupList = [];
 
             for (let j = 0; j < abpList.length; j++) {
@@ -114,6 +109,7 @@
             const ptLocations = pointLocations(base, operation, coefficient, width, height, hasspiral);
             const pps = patternPaths(abpList, ptLocations);
 
+            let i = 1;
             while (pps.length > 0) {
                 //random color selected
                 const color = `#${(BigInt(Date.now()) * BigInt(i*i)).toString(16).slice(-6)}`;
@@ -137,7 +133,7 @@
                         // console.log("if pattern converges to 0 and is not longer than 2 numbers it will not be rendered in the graphic")
                         continue;
                     }
-                    if (odv.length === 1) {
+                    if (odv.length === 1) { // When same number repeats, this adds the points of a square around the number repeating 
                         const percent2w = Math.floor(width / 50);
                         const percent2h = Math.floor(height / 50);
                         svgPts.push(`${pt[0] - percent2w},${pt[1] - percent2h}`);
@@ -326,10 +322,6 @@
             }
             return allbasepats;
         }
-
-
-
-
 
     </script>
 </body>
