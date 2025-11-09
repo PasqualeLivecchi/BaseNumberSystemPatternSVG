@@ -2,17 +2,14 @@
 <html lang='en'>
 
 <head>
+    <title>Base Patterns Interactive Graphic</title>
     <style>
-        .patterndiv { /* deals with alignment of text and svg graphic */
+        html {
             position: sticky;
-            left: 20%;
-            right: 20%;
             text-align: center;
         }
-
         .equationlabel {
             top: 40px;
-            text-align: center;
         }
 
         .svg-content {
@@ -45,12 +42,11 @@
             }
         }
     </style>
-    <title>Base Patterns Interactive Graphic</title>
 </head>
 
 <body>
     <h2>Base Patterns Interactive Graphic</h2>
-    <div id="userInputId">
+    <div id="userInputId" class="allpage">
         <label for="basenumber">Base Number:</label>
         <input id="baseId" type="text" name="basenumber" value="10">
         <label for="op">Choose Operation:</label>
@@ -153,7 +149,7 @@
                 svgTextList.push(`<text fill='#ae76e4' font-size='${ratioView2Text}' x='${xyPos[0]}' y='${xyPos[1]}' transform='rotate(90 ${xyPos[0]},${xyPos[1]})'>${numKey}</text>`);
             }
 
-            htmlSvgList.push(`<div id="patterndiv" class='patterndiv'><div id='equationlabel${base}${operation}${coefficient}' class='equationlabel'>Base Number System: ${base}, Operation: ${operation}, Coefficient: ${coefficient}, Equation: ${base} ${operation} ${coefficient} <p>Each color is a repeating pattern that occurs when the operation ${operation} ${coefficient} is repeated</p>${abpPointsTextList.join('')}<p>and then the result is reduced by addition into a single digit within the base number system.</p></div><svg class='svg-content' width='${width}' height='${height}' viewBox='-${ratioView2Text*2},-${ratioView2Text*2},${width + ratioView2Text * 3},${height + ratioView2Text * 3}'>${svgTextList.join('')}<polygon points='${ptl.join(' ')}' fill='none' stroke='black' stroke-width='2'></polygon>${colorMkupList.join('')}</svg></div>`)
+            htmlSvgList.push(`<div id="patterndiv" class='patterndiv' class='allpage'><div id='equationlabel${base}${operation}${coefficient}' class='equationlabel'>Base Number System: ${base}, Operation: ${operation}, Coefficient: ${coefficient}, Equation: ${base} ${operation} ${coefficient} <p>Each color is a repeating pattern that occurs when the operation ${operation} ${coefficient} is repeated</p>${abpPointsTextList.join('')}<p>and then the result is reduced by addition into a single digit within the base number system.</p></div><svg class='svg-content' width='${width}' height='${height}' viewBox='-${ratioView2Text*2},-${ratioView2Text*2},${width + ratioView2Text * 3},${height + ratioView2Text * 3}'>${svgTextList.join('')}<polygon points='${ptl.join(' ')}' fill='none' stroke='black' stroke-width='2'></polygon>${colorMkupList.join('')}</svg></div>`)
 
             return htmlSvgList.join("");
         }
